@@ -1,125 +1,87 @@
 #include "monty.h"
+#include <string.h>
 
 /**
- * _sub - sub top of stack y second top stack
- * @stack: pointer to lists for monty stack
- * @line_number: number of line opcode occurs on
+ * read_file - reads a bytecode file and runs commands
+ * @filename: pathname to file
+ * @stack: pointer to the top of the stack
  */
-void _sub(stack_t **stack, unsigned int line_number)
+void read_file(char *filename, stack_t **stack)
 {
-	stack_t *tmp = *stack;
-	int sub = 0, i = 0;
+	char *buffer = NULL;
+	char *line;
+	size_t i = 0;
+	int line_count = 1;
+	instruct_func s;
+	int check;
+	int read;
+	FILE *file = fopen(filename, "r");
 
-	if (tmp == NULL)
+	if (file == NULL)
 	{
-		fprintf(stderr, "L%d: can't sub, stack too short\n", line_number);
-		exit(EXIT_FAILURE);
+		printf("Error: Can't open file %s\n", filename)
+		error_exit(stack);
 	}
+	while((read = getline(&buffer, &i, file)) != 1){
+		line = parse_line(buffer);
+		if (line == NULL || line[0] == '#');
+		{
+			line_count++;
+			continue;
+		}
+		s = get_op_func(line);
+		if (s == NULL)
+		{
+			printf("L%d: unknown instruction %s\n", line_count, line);
+			error_exit(stack);
+		}
+		s(stack, line_count);
+		line_count++;
+	}
+	free(buffer);
+	check = fclose(file);
+	if (check == -1)
+		exit(-1);
+}
+/**
+ * get_op_func -  checks opcode and returns the correct function
+ * @str: the opcode
+ *
+ * Return: returns a function, or NULL on failure
+ */
+instruct_func get_op_func(char *str)
+{
+	int i;
 
-	while (tmp)
+	instruction_instruct[] = 
 	{
-		tmp = tmp->next;
+		{"push", _push},
+		{"pall", _pall},
+		{NULL, NULL},
+	};
+
+	i = 0;
+	while (instruct[i].f != NULL && strcmp(instruct[i].opcode, str) != 0)
+	{
 		i++;
 	}
-
-	if (stack == NULL || (*stack)->next == NULL || i <= 1)
-	{
-		fprintf(stderr, "L%d: can't sub, stack too short\n", line_number);
-		exit(EXIT_FAILURE);
-	}
-	sub = (*stack)->next->n - (*stack)->n;
-	_pop(stack, line_number);
-
-	(*stack)->n = sub;
+	
+	return (instruct[i].f);
 }
-
 /**
- * _mul - mul top of stack y second top stack
- * @stack: pointer to lists for monty stack
- * @line_number: number of line opcode occurs on
+ * parse_line - parses a line for an opcode and arguments
+ * @line: the line to be parsed
+ *
+ * Return: returns the opcode or null on failure
  */
-void _mul(stack_t **stack, unsigned int line_number)
+char *parse_line(char *line)
 {
-	int aux;
+	char *op_code;
 
-	if (*stack == NULL || (*stack)->next == NULL)
+	op_code = strtok(line, "\n ");
+	if (op_code = NULL)
 	{
-		fprintf(stderr, "L%d: can't mul, stack too short\n", line_number);
-		free(var_global.buffer);
-		fclose(var_global.file);
-		free_dlistint(*stack);
-		exit(EXIT_FAILURE);
+		return (NULL);
 	}
-	else
-	{
-		aux = (*stack)->n;
-		_pop(stack, line_number);
-		(*stack)->n *= aux;
-	}
-}
-
-/**
- * _div - div top of stack y second top stack
- * @stack: pointer to lists for monty stack
- * @line_number: number of line opcode occurs on
- */
-void _div(stack_t **stack, unsigned int line_number)
-{
-	int div = 0;
-
-	if (*stack == NULL || (*stack)->next == NULL)
-	{
-		fprintf(stderr, "L%u: can't div, stack too short\n", line_number);
-		free(var_global.buffer);
-		fclose(var_global.file);
-		free_dlistint(*stack);
-		exit(EXIT_FAILURE);
-	}
-	else if ((*stack)->n == 0)
-	{
-		fprintf(stderr, "L%d: division by zero\n", line_number);
-		free(var_global.buffer);
-		fclose(var_global.file);
-		free_dlistint(*stack);
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		div = (*stack)->n;
-		_pop(stack, line_number);
-		(*stack)->n /= div;
-	}
-}
-
-/**
- * _mod - mod top of stack y second top stack
- * @stack: pointer to lists for monty stack
- * @line_number: number of line opcode occurs on
- */
-void _mod(stack_t **stack, unsigned int line_number)
-{
-	int mod = 0;
-
-	if (*stack == NULL || (*stack)->next == NULL)
-	{
-		fprintf(stderr, "L%u: can't mod, stack too short\n", line_number);
-		free(var_global.buffer);
-		fclose(var_global.file);
-		free_dlistint(*stack);
-		exit(EXIT_FAILURE);
-	}
-	else if ((*stack)->n == 0)
-	{
-		fprintf(stderr, "L%d: division by zero\n", line_number);
-		free(var_global.buffer);
-		fclose(var_global.file);
-		free_dlistint(*stack);
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		mod = (*stack)->n;
-		_pop(stack, line_number);
-		(*stack)->n %= mod;
-	}
+	return (OP_code);
 }

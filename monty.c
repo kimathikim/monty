@@ -1,24 +1,24 @@
 #include "monty.h"
-global_var var_global;
+
 /**
- * main - driver function for monty program
- * @ac: int num of arguments
- * @av: opcode file
+ * main - Entry of the program monty
+ * @ac: an integer representing the number of arguments passed to the program
+ * @av: a double pointer to an array of strings
+ * representing the arguments passed to the program
  * Return: 0
  */
+int flag = 0;
+
 int main(int ac, char **av)
 {
-	stack_t *stack;
+	stack_t *stack;// initializing stack
 
-	stack = NULL;
 	if (ac != 2)
 	{
-		fprintf(stderr, "USAGE: monty file\n");
-		exit(EXIT_FAILURE);
+		printf("USAGE: monty file\n");
+		error_exit(&stack);
 	}
-
 	read_file(av[1], &stack);
-    /* recordar liberar memorias */
 	free_dlistint(stack);
 	return (0);
 }
